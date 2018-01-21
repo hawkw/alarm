@@ -64,20 +64,20 @@ pub trait Linked: Sized // + Drop
     /// [`Links`]: struct.Links.html
     fn links_mut(&mut self) -> &mut Links<Self>;
 
-    /// De-link this node, returning its' Links.
+    /// De-link this node, returning its [`Links`].
+    ///
+    /// [`Links`]: struct.Links.html
     fn take_links(&mut self) -> Links<Self> {
         mem::replace(self.links_mut(), Links::new())
     }
 
-    /// Borrow the `next` element in the list, or `None` if this is the
-    /// last.
+    /// Borrow the `next` element in the list, or `None` if this is the last.
     #[inline]
     fn next(&self) -> Option<&Self> {
         self.links().next()
     }
 
-    /// Borrow the `prev` element in the list, or `None` if this is the
-    /// first.
+    /// Borrow the `prev` element in the list, or `None` if this is the first.
     #[inline]
     fn prev(&self) -> Option<&Self> {
         self.links().prev()
@@ -95,6 +95,26 @@ pub trait Linked: Sized // + Drop
     #[inline]
     fn prev_mut(&mut self) -> Option<&mut Self> {
         self.links_mut().prev_mut()
+    }
+
+    /// Borrow the element at the front of the list.
+    fn front(&self) -> &Self {
+        let mut link = self;
+        while let Some(prev_link) = link.prev() {
+            link = prev_link;
+        }
+
+        &link
+    }
+
+    /// Borrow the element at the back of the list.
+    fn back(&self) -> &Self {
+        let mut link = self;
+        while let Some(next_link) = link.next() {
+            link = next_link;
+        }
+
+        &link
     }
 }
 
