@@ -4,7 +4,7 @@
 //  Copyright (c) 2015-2017 Eliza Weisman
 //  Released under the terms of the MIT license. See `LICENSE` in the root
 //  directory of this repository for more information.
-// 
+//
 
 use super::*;
 use super::Linked;
@@ -53,6 +53,7 @@ impl Into<usize> for NumberedNode {
         self.number
     }
 }
+
 mod boxed {
     use super::*;
     use std::boxed::Box;
@@ -171,18 +172,6 @@ mod boxed {
             list.head() == list.tail()
         }
 
-        // fn head_tail_not_same_second_push(a: usize, b: usize) -> TestResult {
-        //     if a == b {
-        //         return TestResult::discard()
-        //     };
-        //     let mut list = List::<usize, NumberedNode, Box<NumberedNode>>::new();
-
-        //     list.push_front(a);
-        //     list.push_front(b);
-
-        //     TestResult::from_bool(list.head().unwrap() != list.tail().unwrap())
-        // }
-
         fn push_front_order(x: usize, xs: Vec<usize>) -> TestResult {
             let mut list = List::<usize, NumberedNode, Box<NumberedNode>>::new();
             list.push_front(x);
@@ -195,6 +184,35 @@ mod boxed {
                 );
             }
             result
+        }
+
+        fn front_back_same_first_push(n: usize) -> bool {
+            let mut list = List::<usize, NumberedNode, Box<NumberedNode>>::new();
+
+            list.push_front(n);
+
+            list.head().unwrap().front() == list.tail().unwrap().front()
+            && list.head().unwrap().back() == list.tail().unwrap().back()
+        }
+
+        fn front_back_order(xs: Vec<usize>) -> bool {
+            let mut list = List::<usize, NumberedNode, Box<NumberedNode>>::new();
+
+            for x in xs.iter().cloned() {
+                list.push_back(x);
+            }
+
+            // Nothing to check if `xs` is empty
+            let len = xs.len();
+            len == 0 || {
+                let first = xs[0];
+                let last = xs[len - 1];
+
+                list.head().unwrap().front().number == first
+                && list.tail().unwrap().front().number == first
+                && list.head().unwrap().back().number == last
+                && list.tail().unwrap().back().number == last
+            }
         }
     }
 
