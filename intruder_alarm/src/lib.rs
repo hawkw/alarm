@@ -52,6 +52,7 @@ use core::ops::Deref;
 use core::ptr::NonNull;
 
 pub mod doubly;
+pub mod singly;
 
 /// Trait for references which own their referent.
 ///

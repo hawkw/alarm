@@ -18,7 +18,7 @@ mod tests;
 // Public API types
 //-----------------------------------------------------------------------------
 //  List
-/// An intrusive doubly-linked list.
+/// An intrusive singly-linked list.
 ///
 /// This type is a wrapper around a series of [`Node`]s. It stores [`Link`]s
 /// to the head and tail [`Node`]s and the length of the list.
@@ -140,7 +140,7 @@ pub trait Linked: Sized // + Drop
 #[derive(Default, Debug)]
 pub struct Links<T> {
     pub(super) next: Link<T>,
-    pub(super) prev: Link<T>,
+    //pub(super) prev: Link<T>,
 }
 
 //-----------------------------------------------------------------------------
@@ -227,12 +227,12 @@ where
     pub fn push_front_node(&mut self, mut node: Ref) -> &mut Self {
         unsafe {
             node.links_mut().next = self.head;
-            node.links_mut().prev = Link::none();
+            //node.links_mut().prev = Link::none();
             let node = Link::from_owning_ref(node);
 
             match self.head.0 {
                 None => self.tail = node,
-                Some(mut head) => head.as_mut().links_mut().prev = node,
+                Some(mut head) => ()
             }
 
             self.head = node;
@@ -245,7 +245,7 @@ where
     pub fn push_back_node(&mut self, mut node: Ref) -> &mut Self {
         unsafe {
             node.links_mut().next = Link::none();
-            node.links_mut().prev = self.tail;
+            //node.links_mut().prev = self.tail;
             let node = Link::from_owning_ref(node);
 
             match self.tail.0 {
@@ -273,7 +273,7 @@ where
 
                 match self.head.as_mut() {
                     None => self.tail = Link::none(),
-                    Some(head) => head.links_mut().prev = Link::none(),
+                    Some(head) => ()
                 }
 
                 self.len -= 1;
@@ -286,7 +286,7 @@ where
     pub fn pop_back_node(&mut self) -> Option<Ref> {
         unsafe {
             self.tail.as_ptr().map(|node| {
-                self.tail = (*node).take_links().prev;
+                //self.tail = (*node).take_links().prev;
 
                 match self.tail.as_mut() {
                     None => self.head = Link::none(),
@@ -437,7 +437,6 @@ impl<T> Links<T> {
     const fn new() -> Self {
         Links {
             next: Link::none(),
-            prev: Link::none(),
         }
     }
 
@@ -452,7 +451,12 @@ impl<T> Links<T> {
     /// first.
     #[inline]
     fn prev(&self) -> Option<&T> {
-        self.prev.as_ref()
+        //TODO:
+        //self.prev.as_ref()
+        // traverse the list upto self - 1,
+        // keep saving current node
+        // return current when next == self
+        self.next.as_ref()  //FIXME
     }
 
     /// Mutably borrow the `next` element in the list.
@@ -472,7 +476,11 @@ impl<T> Links<T> {
     /// -  or `None` if this is the first.
     #[inline]
     fn prev_mut(&mut self) -> Option<&mut T> {
-        self.prev.as_mut()
+        // TODO:
+        // traverse the list upto self - 1,
+        // keep saving current node
+        // return current when next == self
+        self.next.as_mut()  //FIXME
     }
 
     /// Returns true if this set of links is a member of a list.
