@@ -135,24 +135,6 @@ mod boxed {
             list.push_front(n);
             list.head().unwrap().number == n
         }
-
-        /*fn extend_sum_len(ys: Vec<usize>, xs: Vec<usize>) -> bool {
-            let mut list = NumberedList::new();
-            let total = ys.len() + xs.len();
-            for y in ys {
-                list.push_front(y);
-            }
-            list.extend(xs);
-
-            list.len() == total
-        }
-
-        fn from_iter_len(xs: Vec<usize>) -> bool {
-            let lx = xs.len();
-            let list = NumberedList::from_iter(xs);
-
-            list.len() == lx
-        }*/
     }
 
     #[test]
@@ -236,31 +218,4 @@ mod boxed {
         assert!(list.is_empty());
         assert_eq!(list.pop_front(), None);
     }
-    /*
-    #[test]
-    fn test_extend() {
-        let mut list = NumberedList::new();
-
-        list.push_back(0);
-        list.push_back(1);
-
-        assert_eq!(list.tail().unwrap().number, 1);
-        assert_eq!(list.head().unwrap().number, 0);
-
-        let ext = vec![3, 4];
-        list.extend(ext);
-
-        assert_eq!(list.tail().unwrap().number, 4);
-        assert_eq!(list.head().unwrap().number, 0);
-    }
-
-    #[test]
-    fn test_fromiter() {
-        let list_a = (0..10).into_iter();
-        let mut nlist = NumberedList::from_iter(list_a);
-
-        for i in 0..10 {
-            assert_eq!(nlist.pop_front().unwrap(), i);
-        }
-    }*/
 }
