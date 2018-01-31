@@ -30,10 +30,10 @@ impl NumberedNode {
 
 impl Linked for NumberedNode {
     #[inline]
-    fn links(&self) -> &Link<Self> { &self.next }
+    fn next(&self) -> &Link<Self> { &self.next }
 
     #[inline]
-    fn links_mut(&mut self) -> &mut Link<Self> {
+    fn next_mut(&mut self) -> &mut Link<Self> {
         &mut self.next
     }
 }

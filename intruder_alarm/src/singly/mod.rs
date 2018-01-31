@@ -54,49 +54,16 @@ pub trait Linked: Sized // + Drop
     /// Borrow this element's [`Link`].
     ///
     /// [`Links`]: struct.Links.html
-    fn links(&self) -> &Link<Self>;
+    fn next(&self) -> &Link<Self>;
 
     /// Mutably borrow this element's [`Links`].
     ///
     /// [`Links`]: struct.Links.html
-    fn links_mut(&mut self) -> &mut Link<Self>;
+    fn next_mut(&mut self) -> &mut Link<Self>;
 
     /// De-link this node, returning its' Links.
-    fn take_links(&mut self) -> Link<Self> {
-        mem::replace(self.links_mut(), Link::none())
-    }
-
-    /// Borrow the `next` element in the list, or `None` if this is the
-    /// last.
-    #[inline]
-    fn next(&self) -> Option<&Self> {
-        self.links().as_ref()
-    }
-
-    /// Mutably borrow the `next` element in the list, or `None` if this is the
-    /// last.
-    #[inline]
-    fn next_mut(&mut self) -> Option<&mut Self> {
-        self.links_mut().as_mut()
-    }
-
-    /// Borrow the `next` linked element, or `None` if this is the last.
-    #[inline]
-    fn peek_next<T>(&self) -> Option<&T>
-    where
-        Self: AsRef<T>,
-    {
-        self.next().map(Self::as_ref)
-    }
-
-    /// Mutably borrow the `next` linked element, or `None` if this is the
-    /// last.
-    #[inline]
-    fn peek_next_mut<T>(&mut self) -> Option<&mut T>
-    where
-        Self: AsMut<T>,
-    {
-        self.next_mut().map(Self::as_mut)
+    fn take_next(&mut self) -> Link<Self> {
+        mem::replace(self.next_mut(), Link::none())
     }
 }
 
@@ -162,7 +129,7 @@ where
     /// Push a node to the head of the list.
     pub fn push_front_node(&mut self, mut node: Ref) -> &mut Self {
         unsafe {
-            *node.links_mut() = self.head;
+            *node.next_mut() = self.head;
             let node = Link::from_owning_ref(node);
             self.head = node;
             self.len += 1;
@@ -180,7 +147,7 @@ where
     pub fn pop_front_node(&mut self) -> Option<Ref> {
         unsafe {
             self.head.as_ptr().map(|node| {
-                self.head = (*node).take_links();
+                self.head = (*node).take_next();
                 self.len -= 1;
                 Ref::from_ptr(node as *const Node)
             })
