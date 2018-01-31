@@ -48,20 +48,20 @@ pub struct List<T, N, R> {
 
 //  Linked
 /// Trait that must be implemented in order to be a member of an intrusive
-/// linked list.
+/// singly linked list.
 pub trait Linked: Sized // + Drop
 {
-    /// Borrow this element's [`Link`].
+    /// Borrow this element's next [`Link`].
     ///
-    /// [`Links`]: struct.Links.html
+    /// [`Links`]: struct.Link.html
     fn next(&self) -> &Link<Self>;
 
-    /// Mutably borrow this element's [`Links`].
+    /// Mutably borrow this element's next [`Link`].
     ///
-    /// [`Links`]: struct.Links.html
+    /// [`Links`]: struct.Link.html
     fn next_mut(&mut self) -> &mut Link<Self>;
 
-    /// De-link this node, returning its' Links.
+    /// De-link this node, returning its' next Link.
     fn take_next(&mut self) -> Link<Self> {
         mem::replace(self.next_mut(), Link::none())
     }
@@ -109,7 +109,7 @@ impl<T, Node, R> List<T, Node, R> {
         self.head.as_ref()
     }
 
-    /// Mutably borrows the first node of the list as an `Option`
+    /// Mutably borrows the head node of the list as an `Option`
     ///
     /// # Returns
     ///   - `Some(&mut Node)` if the list has elements
@@ -126,7 +126,7 @@ where
     Ref: OwningRef<Node>,
     Ref: DerefMut,
 {
-    /// Push a node to the head of the list.
+    /// Push a node to the list.
     pub fn push(&mut self, mut node: Ref) -> &mut Self {
         unsafe {
             *node.next_mut() = self.head;
@@ -143,7 +143,7 @@ where
     Node: Linked,
     Ref: OwningRef<Node>,
 {
-    /// Pop a node from the front of the list.
+    /// Pop a node from the list.
     pub fn pop(&mut self) -> Option<Ref> {
         unsafe {
             self.head.as_ptr().map(|node| {
@@ -159,7 +159,7 @@ impl<T, Node, R> List<T, Node, R>
 where
     Node: AsRef<T>,
 {
-    /// Borrows the first item of the list as an `Option`
+    /// Borrows the head item of the list as an `Option`
     ///
     /// # Returns
     ///   - `Some(&T)` if the list has elements
@@ -174,7 +174,7 @@ impl<T, Node, R> List<T, Node, R>
 where
     Node: AsMut<T>,
 {
-    /// Mutably borrows the first element of the list as an `Option`
+    /// Mutably borrows the head element of the list as an `Option`
     ///
     /// # Returns
     ///   - `Some(&mut T)` if the list has elements
@@ -200,7 +200,7 @@ where
     Node: From<T>,
     Node: Linked,
 {
-    /// Push an item to the front of the list.
+    /// Push an item to the list.
     #[inline]
     pub fn push_item(&mut self, item: T) -> &mut Self {
         self.push(Box::new(Node::from(item)))
@@ -213,7 +213,7 @@ where
     Node: Linked,
     Node: Into<T>,
 {
-    /// Pop an item from the front of the list.
+    /// Pop an item from the list.
     #[inline]
     pub fn pop_item(&mut self) -> Option<T> {
         self.pop().map(|b| (*b).into())
