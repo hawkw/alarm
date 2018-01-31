@@ -14,7 +14,7 @@ use std::default::Default;
 #[derive(Default, Debug)]
 pub struct NumberedNode {
     pub number: usize,
-    links: Links<NumberedNode>,
+    next: Link<NumberedNode>,
 }
 
 pub type NumberedList = List<usize, NumberedNode, Box<NumberedNode>>;
@@ -30,13 +30,11 @@ impl NumberedNode {
 
 impl Linked for NumberedNode {
     #[inline]
-    fn links(&self) -> &Links<Self> {
-        &self.links
-    }
+    fn links(&self) -> &Link<Self> { &self.next }
 
     #[inline]
-    fn links_mut(&mut self) -> &mut Links<Self> {
-        &mut self.links
+    fn links_mut(&mut self) -> &mut Link<Self> {
+        &mut self.next
     }
 }
 
