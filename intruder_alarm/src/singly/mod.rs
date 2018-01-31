@@ -162,20 +162,8 @@ where
     /// Push a node to the head of the list.
     pub fn push_front_node(&mut self, mut node: Ref) -> &mut Self {
         unsafe {
-            /*
-                Link is also a struct, with Optional interface
-                What is this `node`?
-            */
             *node.links_mut() = self.head;
-
             let node = Link::from_owning_ref(node);
-
-            //TODO: What about this ()?
-            match self.head.0 {
-                None => (),  //FIXME
-                Some(mut head) => ()  //FIXME
-            }
-
             self.head = node;
             self.len += 1;
         };
@@ -193,12 +181,6 @@ where
         unsafe {
             self.head.as_ptr().map(|node| {
                 self.head = (*node).take_links();
-
-                match self.head.as_mut() {
-                    None => (),
-                    Some(head) => ()
-                }
-
                 self.len -= 1;
                 Ref::from_ptr(node as *const Node)
             })
