@@ -83,7 +83,6 @@ mod boxed {
             let mut list = NumberedList::new();
 
             assert_eq!(list.head(), None);
-            assert_eq!(list.tail(), None);
             assert!(list.is_empty());
             assert_eq!(list.len(), 0);
 
@@ -97,45 +96,11 @@ mod boxed {
         fn contents_after_first_push() {
             let mut list = NumberedList::new();
             assert_eq!(list.head(), None);
-            assert_eq!(list.tail(), None);
 
             list.push_front_node(Box::new(NumberedNode::new(555)));
 
-            assert_eq!(list.tail().unwrap().number, 555);
             assert_eq!(list.head().unwrap().number, 555);
         }
-
-        #[test]
-        fn head_tail_equal_after_first_push() {
-            let mut list = NumberedList::new();
-            assert_eq!(list.head(), list.tail());
-
-            list.push_front_node(Box::new(NumberedNode::new(444)));
-
-            assert_eq!(list.head(), list.tail());
-        }
-
-        #[test]
-        fn head_tail_not_equal_after_second_push() {
-            let mut list = NumberedList::new();
-
-            list.push_front_node(Box::new(NumberedNode::new(444)));
-            list.push_front_node(Box::new(NumberedNode::new(555)));
-
-            assert!(list.head().unwrap() != list.tail().unwrap());
-        }
-    }
-
-    #[test]
-    fn head_tail_not_same_second_push() {
-        let mut list = NumberedList::new();
-        let a = 444;
-        let b = 555;
-
-        list.push_front(a);
-        list.push_front(b);
-
-        assert!(list.head().unwrap() != list.tail().unwrap());
     }
 
     quickcheck! {
@@ -146,7 +111,7 @@ mod boxed {
             for x_2 in xs {
                 list.push_front_node(Box::new(NumberedNode::new(x_2)));
                 result = TestResult::from_bool(
-                    list.tail().unwrap().number == x &&
+                    //list.tail().unwrap().number == x &&
                     list.head().unwrap().number == x_2
                 );
             }
@@ -157,7 +122,6 @@ mod boxed {
             let mut list = NumberedList::new();
 
             assert_eq!(list.head(), None);
-            assert_eq!(list.tail(), None);
 
             assert!(list.is_empty());
             assert_eq!(list.len(), 0);
@@ -170,29 +134,15 @@ mod boxed {
         fn contents_after_first_push(n: usize) -> bool {
             let mut list = NumberedList::new();
             assert_eq!(list.head(), None);
-            assert_eq!(list.tail(), None);
             list.push_front(n);
-            list.tail().unwrap().number == n &&
             list.head().unwrap().number == n
         }
 
-        fn linked_peek_prev_next(a: usize, b: usize) -> bool {
-            let mut list = NumberedList::new();
-
-            list.push_back(a);
-            list.push_back(b);
-
-            list.head().unwrap().peek_prev() == None
-            && list.head().unwrap().peek_next() == Some(&b)
-            && list.tail().unwrap().peek_prev() == Some(&a)
-            && list.tail().unwrap().peek_next() == None
-        }
-
-        fn extend_sum_len(ys: Vec<usize>, xs: Vec<usize>) -> bool {
+        /*fn extend_sum_len(ys: Vec<usize>, xs: Vec<usize>) -> bool {
             let mut list = NumberedList::new();
             let total = ys.len() + xs.len();
             for y in ys {
-                list.push_back(y);
+                list.push_front(y);
             }
             list.extend(xs);
 
@@ -204,7 +154,7 @@ mod boxed {
             let list = NumberedList::from_iter(xs);
 
             list.len() == lx
-        }
+        }*/
     }
 
     #[test]
@@ -214,16 +164,13 @@ mod boxed {
         list.push_front_node(Box::new(NumberedNode::new(0)));
         list.push_front_node(Box::new(NumberedNode::new(1)));
 
-        assert_eq!(list.tail().unwrap().number, 0);
         assert_eq!(list.head().unwrap().number, 1);
 
-        list.push_back_node(Box::new(NumberedNode::new(2)));
-        assert_eq!(list.tail().unwrap().number, 2);
-        assert_eq!(list.head().unwrap().number, 1);
+        list.push_front_node(Box::new(NumberedNode::new(2)));
+        assert_eq!(list.head().unwrap().number, 2);
 
-        list.push_back_node(Box::new(NumberedNode::new(3)));
-        assert_eq!(list.tail().unwrap().number, 3);
-        assert_eq!(list.head().unwrap().number, 1);
+        list.push_front_node(Box::new(NumberedNode::new(3)));
+        assert_eq!(list.head().unwrap().number, 3);
 
         assert!(!list.is_empty());
     }
@@ -233,73 +180,31 @@ mod boxed {
         let mut list = NumberedList::new();
 
         assert_eq!(list.head(), None);
-        assert_eq!(list.tail(), None);
         assert!(list.is_empty());
 
         list.push_front_node(Box::new(NumberedNode::new(2)));
 
         assert!(!list.is_empty());
-        assert_eq!(list.head(), list.tail());
 
         list.push_front_node(Box::new(NumberedNode::new(1)));
         list.push_front_node(Box::new(NumberedNode::new(0)));
 
         assert_eq!(list.head().unwrap().number, 0);
-        assert_eq!(list.tail().unwrap().number, 2);
 
-        list.push_back_node(Box::new(NumberedNode::new(3)));
-        assert_eq!(list.tail().unwrap().number, 3);
+        list.push_front_node(Box::new(NumberedNode::new(3)));
 
-        list.push_back_node(Box::new(NumberedNode::new(4)));
-        assert_eq!(list.tail().unwrap().number, 4);
+        list.push_front_node(Box::new(NumberedNode::new(4)));
 
         assert!(!list.is_empty());
 
+        assert_eq!(list.pop_front_node().unwrap().number, 4);
+        assert_eq!(list.pop_front_node().unwrap().number, 3);
         assert_eq!(list.pop_front_node().unwrap().number, 0);
         assert_eq!(list.pop_front_node().unwrap().number, 1);
         assert_eq!(list.pop_front_node().unwrap().number, 2);
-        assert_eq!(list.pop_front_node().unwrap().number, 3);
-        assert_eq!(list.pop_front_node().unwrap().number, 4);
 
         assert!(list.is_empty());
         assert_eq!(list.pop_front_node(), None);
-    }
-
-    #[test]
-    fn test_pop_back_node() {
-        let mut list = NumberedList::new();
-
-        assert_eq!(list.head(), None);
-        assert_eq!(list.tail(), None);
-        assert!(list.is_empty());
-
-        list.push_front_node(Box::new(NumberedNode::new(2)));
-
-        assert!(!list.is_empty());
-        assert_eq!(list.head(), list.tail());
-
-        list.push_front_node(Box::new(NumberedNode::new(1)));
-        list.push_front_node(Box::new(NumberedNode::new(0)));
-
-        assert_eq!(list.head().unwrap().number, 0);
-        assert_eq!(list.tail().unwrap().number, 2);
-
-        list.push_back_node(Box::new(NumberedNode::new(3)));
-        assert_eq!(list.tail().unwrap().number, 3);
-
-        list.push_back_node(Box::new(NumberedNode::new(4)));
-        assert_eq!(list.tail().unwrap().number, 4);
-
-        assert!(!list.is_empty());
-
-        assert_eq!(list.pop_back_node().unwrap().number, 4);
-        assert_eq!(list.pop_back_node().unwrap().number, 3);
-        assert_eq!(list.pop_back_node().unwrap().number, 2);
-        assert_eq!(list.pop_back_node().unwrap().number, 1);
-        assert_eq!(list.pop_back_node().unwrap().number, 0);
-
-        assert!(list.is_empty());
-        assert_eq!(list.pop_back_node(), None);
     }
 
     #[test]
@@ -307,75 +212,33 @@ mod boxed {
         let mut list = NumberedList::new();
 
         assert_eq!(list.head(), None);
-        assert_eq!(list.tail(), None);
         assert!(list.is_empty());
 
         list.push_front_node(Box::new(NumberedNode::new(2)));
 
         assert!(!list.is_empty());
-        assert_eq!(list.head(), list.tail());
 
         list.push_front_node(Box::new(NumberedNode::new(1)));
         list.push_front_node(Box::new(NumberedNode::new(0)));
 
         assert_eq!(list.head().unwrap().number, 0);
-        assert_eq!(list.tail().unwrap().number, 2);
 
-        list.push_back_node(Box::new(NumberedNode::new(3)));
-        assert_eq!(list.tail().unwrap().number, 3);
+        list.push_front_node(Box::new(NumberedNode::new(3)));
 
-        list.push_back_node(Box::new(NumberedNode::new(4)));
-        assert_eq!(list.tail().unwrap().number, 4);
+        list.push_front_node(Box::new(NumberedNode::new(4)));
 
         assert!(!list.is_empty());
 
+        assert_eq!(list.pop_front().unwrap(), 4);
+        assert_eq!(list.pop_front().unwrap(), 3);
         assert_eq!(list.pop_front().unwrap(), 0);
         assert_eq!(list.pop_front().unwrap(), 1);
         assert_eq!(list.pop_front().unwrap(), 2);
-        assert_eq!(list.pop_front().unwrap(), 3);
-        assert_eq!(list.pop_front().unwrap(), 4);
 
         assert!(list.is_empty());
         assert_eq!(list.pop_front(), None);
     }
-
-    #[test]
-    fn test_pop_back() {
-        let mut list = NumberedList::new();
-
-        assert_eq!(list.head(), None);
-        assert_eq!(list.tail(), None);
-        assert!(list.is_empty());
-
-        list.push_front_node(Box::new(NumberedNode::new(2)));
-
-        assert!(!list.is_empty());
-        assert_eq!(list.head(), list.tail());
-
-        list.push_front_node(Box::new(NumberedNode::new(1)));
-        list.push_front_node(Box::new(NumberedNode::new(0)));
-
-        assert_eq!(list.head().unwrap().number, 0);
-        assert_eq!(list.tail().unwrap().number, 2);
-
-        list.push_back_node(Box::new(NumberedNode::new(3)));
-        assert_eq!(list.tail().unwrap().number, 3);
-
-        list.push_back_node(Box::new(NumberedNode::new(4)));
-        assert_eq!(list.tail().unwrap().number, 4);
-
-        assert!(!list.is_empty());
-
-        assert_eq!(list.pop_back().unwrap(), 4);
-        assert_eq!(list.pop_back().unwrap(), 3);
-        assert_eq!(list.pop_back().unwrap(), 2);
-        assert_eq!(list.pop_back().unwrap(), 1);
-        assert_eq!(list.pop_back().unwrap(), 0);
-
-        assert!(list.is_empty());
-        assert_eq!(list.pop_back(), None);
-    }
-
+    /*
     #[test]
     fn test_extend() {
         let mut list = NumberedList::new();
@@ -401,5 +264,5 @@ mod boxed {
         for i in 0..10 {
             assert_eq!(nlist.pop_front().unwrap(), i);
         }
-    }
+    }*/
 }
