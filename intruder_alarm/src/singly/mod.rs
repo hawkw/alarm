@@ -51,33 +51,33 @@ pub struct List<T, N, R> {
 /// linked list.
 pub trait Linked: Sized // + Drop
 {
-    /// Borrow this element's [`Links`].
+    /// Borrow this element's [`Link`].
     ///
     /// [`Links`]: struct.Links.html
-    fn links(&self) -> &Links<Self>;
+    fn links(&self) -> &Link<Self>;
 
     /// Mutably borrow this element's [`Links`].
     ///
     /// [`Links`]: struct.Links.html
-    fn links_mut(&mut self) -> &mut Links<Self>;
+    fn links_mut(&mut self) -> &mut Link<Self>;
 
     /// De-link this node, returning its' Links.
-    fn take_links(&mut self) -> Links<Self> {
-        mem::replace(self.links_mut(), Links::new())
+    fn take_links(&mut self) -> Link<Self> {
+        mem::replace(self.links_mut(), Link::none())
     }
 
     /// Borrow the `next` element in the list, or `None` if this is the
     /// last.
     #[inline]
     fn next(&self) -> Option<&Self> {
-        self.links().next()
+        self.links().as_ref()
     }
 
     /// Mutably borrow the `next` element in the list, or `None` if this is the
     /// last.
     #[inline]
     fn next_mut(&mut self) -> Option<&mut Self> {
-        self.links_mut().next_mut()
+        self.links_mut().as_mut()
     }
 
     /// Borrow the `next` linked element, or `None` if this is the last.
@@ -169,12 +169,18 @@ where
     /// Push a node to the head of the list.
     pub fn push_front_node(&mut self, mut node: Ref) -> &mut Self {
         unsafe {
-            node.links_mut().next = self.head;
+            /*
+                Link is also a struct, with Optional interface
+                What is this `node`?
+            */
+            *node.links_mut() = self.head;
+
             let node = Link::from_owning_ref(node);
 
+            //TODO: What about this ()?
             match self.head.0 {
-                None => (),
-                Some(mut head) => ()
+                None => (),  //FIXME
+                Some(mut head) => ()  //FIXME
             }
 
             self.head = node;
@@ -193,7 +199,7 @@ where
     pub fn pop_front_node(&mut self) -> Option<Ref> {
         unsafe {
             self.head.as_ptr().map(|node| {
-                self.head = (*node).take_links().next;
+                self.head = (*node).take_links();
 
                 match self.head.as_mut() {
                     None => (),
@@ -271,41 +277,6 @@ where
         self.pop_front_node().map(|b| (*b).into())
     }
 }
-
-#[cfg(any(feature = "std", test))]
-use core::iter::Extend;
-
-
-/*
-#[cfg(any(feature = "alloc", feature = "std", test))]
-impl<T, Node> Extend<T> for List<T, Node, Box<Node>>
-where
-    Node: From<T> + Linked,
-{
-    #[inline]
-    fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
-        for item in iter {
-            self.push_back(item);
-        }
-    }
-}
-
-#[cfg(any(feature = "std", test))]
-use core::iter::FromIterator;
-
-#[cfg(any(feature = "alloc", feature = "std", test))]
-impl<T, Node> FromIterator<T> for List<T, Node, Box<Node>>
-where
-    Node: From<T> + Linked,
-{
-    #[inline]
-    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
-        let mut list = List::new();
-        list.extend(iter);
-        list
-    }
-}
-*/
 
 // ===== impl Links =====
 
