@@ -275,6 +275,8 @@ where
 #[cfg(any(feature = "std", test))]
 use core::iter::Extend;
 
+
+/*
 #[cfg(any(feature = "alloc", feature = "std", test))]
 impl<T, Node> Extend<T> for List<T, Node, Box<Node>>
 where
@@ -303,6 +305,7 @@ where
         list
     }
 }
+*/
 
 // ===== impl Links =====
 
