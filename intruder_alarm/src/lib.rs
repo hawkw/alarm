@@ -32,9 +32,14 @@
     no_std
 )]
 #![cfg_attr(feature = "alloc", feature(alloc))]
+#![cfg_attr(
+    any(feature = "alloc", feature = "std", test),
+    feature(box_into_raw_non_null)
+)]
 #![feature(shared)]
 #![feature(const_fn)]
 #![deny(missing_docs)]
+
 
 #[cfg(test)]
 #[macro_use]
@@ -46,11 +51,14 @@ extern crate core;
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-use core::{fmt, mem};
+use core::borrow::Borrow;
 use core::default::Default;
-use core::ops::Deref;
+use core::{fmt, mem};
+use core::ops::{Deref, DerefMut};
 use core::ptr::NonNull;
 
+pub mod cursor;
+pub use self::cursor::{Cursor, CursorMut};
 pub mod doubly;
 pub mod singly;
 
@@ -71,6 +79,9 @@ pub unsafe trait OwningRef<T: ?Sized>: Deref<Target = T> {
     /// Convert a raw pointer into an owning reference.
     unsafe fn from_ptr(p: *const Self::Target) -> Self;
 }
+
+/// An unsafe `OwningRef` backed by a [`NonNull`] pointer.
+pub struct UnsafeRef<T: ?Sized>(NonNull<T>);
 
 /// A `Link` provides an [`Option`]-like interface to a [`NonNull`] pointer.
 ///
@@ -119,6 +130,142 @@ unsafe impl<T: ?Sized> OwningRef<T> for Box<T> {
     unsafe fn from_ptr(p: *const T) -> Self {
         Box::from_raw(p as *mut T)
     }
+}
+
+// ===== impl UnsafeRef =====
+
+
+#[cfg(any(feature = "alloc", feature = "std", test))]
+impl<T: ?Sized> UnsafeRef<T> {
+
+    /// Convert a `Box<T>` into an `UnsafeRef<T>`.
+    ///
+    /// # Note
+    /// This is primarily only useful for testing `UnsafeRef` --- if you are
+    /// in an environment where you can easily allocate `Box`es, it is
+    /// much safer to simply use the `OwningRef` impl for `Box`. Typically,
+    /// `UnsafeRef` should only be used when there is no allocator capable
+    /// of allocating `Box`es.
+    #[inline]
+    #[cfg_attr(
+        not(test),
+        deprecated(note = "Use of `UnsafeRef` is likely to be unnecessary \
+                           when `Box` is available.")
+    )]
+    pub fn from_box(b: Box<T>) -> Self {
+        unsafe { UnsafeRef(Box::into_raw_non_null(b)) }
+    }
+
+    /// Construct a new `UnsafeRef` from a `T`, using `Box::new` to allocate a
+    /// memory location for the moved value.
+    ///
+    /// Observant readers will note that this is essentially the only way to
+    /// construct an `UnsafeRef` from a *moved* value, rather than from a
+    /// reference --- this is by design. In order to construct an `UnsafeRef`
+    /// for a moved value, space in memory must be allocated to contain that
+    /// value. If we cannot create `Box`es, than we have no way of allocating
+    /// a memory location for a moved value, and we can only construct
+    /// `UnsafeRef`s from fixed memory locations.
+    ///
+    /// # Note
+    /// This is primarily only useful for testing `UnsafeRef` --- if you are
+    /// in an environment where you can easily allocate `Box`es, it is
+    /// much safer to simply use the `OwningRef` impl for `Box`. Typically,
+    /// `UnsafeRef` should only be used when there is no allocator capable
+    /// of allocating `Box`es.
+    #[inline]
+    #[cfg_attr(
+        not(test),
+        deprecated(note = "Use of `UnsafeRef` is likely to be unnecessary \
+                           when `Box` is available.")
+    )]
+    pub fn boxed(t: T) -> Self
+    where
+        T: Sized,
+    {
+       UnsafeRef::from_box(Box::new(t))
+    }
+
+}
+impl<T: ?Sized> Clone for UnsafeRef<T> {
+
+    #[inline]
+    fn clone(&self) -> Self {
+        UnsafeRef(self.0)
+    }
+}
+
+impl<T: ?Sized> Deref for UnsafeRef<T> {
+    type Target = T;
+
+    #[inline]
+    fn deref(&self) -> &Self::Target {
+        unsafe { self.0.as_ref() }
+    }
+}
+
+impl<T: ?Sized> DerefMut for UnsafeRef<T> {
+    #[inline]
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        unsafe { self.0.as_mut() }
+    }
+}
+
+impl<T: ?Sized> AsRef<T> for UnsafeRef<T> {
+    #[inline]
+    fn as_ref(&self) -> &T {
+        unsafe { self.0.as_ref() }
+    }
+}
+
+impl<T: ?Sized> Borrow<T> for UnsafeRef<T> {
+    #[inline]
+    fn borrow(&self) -> &T {
+        self.as_ref()
+    }
+}
+
+impl<T: ?Sized> fmt::Debug for UnsafeRef<T>
+where
+    T: fmt::Debug
+{
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.as_ref().fmt(f)
+    }
+}
+
+impl<T: ?Sized, F> From<F> for UnsafeRef<T>
+where
+    NonNull<T>: From<F>,
+{
+    #[inline]
+    fn from(f: F) -> Self {
+        UnsafeRef(NonNull::from(f))
+    }
+}
+
+unsafe impl<T: ?Sized> OwningRef<T> for UnsafeRef<T> {
+    #[inline]
+    fn into_ptr(self) -> *const T {
+       self.0.as_ptr() as *const T
+    }
+    #[inline]
+    unsafe fn from_ptr(p: *const T) -> Self {
+        NonNull::new(p as *mut T)
+            .map(UnsafeRef)
+            .expect("attempted to create OwningRef from null pointer!")
+    }
+}
+
+impl<T: ?Sized> PartialEq for UnsafeRef<T>
+where
+    T: PartialEq
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.as_ref() == other.as_ref()
+    }
+
 }
 
 // ===== impl Link =====
