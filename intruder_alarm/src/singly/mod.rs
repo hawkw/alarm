@@ -100,13 +100,6 @@ pub trait Linked: Sized // + Drop
     }
 }
 
-/// Links
-#[derive(Default, Debug)]
-pub struct Links<T> {
-    pub(super) next: Link<T>,
-    //pub(super) prev: Link<T>,
-}
-
 //-----------------------------------------------------------------------------
 // Implementations
 //-----------------------------------------------------------------------------
@@ -275,47 +268,5 @@ where
     #[inline]
     pub fn pop_front(&mut self) -> Option<T> {
         self.pop_front_node().map(|b| (*b).into())
-    }
-}
-
-// ===== impl Links =====
-
-impl<T> Links<T> {
-    /// Returns a new unlinked set of `Links`.
-    #[inline]
-    const fn new() -> Self {
-        Links {
-            next: Link::none(),
-        }
-    }
-
-    /// Borrow the `next` element in the list, or `None` if this is the
-    /// last.
-    #[inline]
-    fn next(&self) -> Option<&T> {
-        self.next.as_ref()
-    }
-
-    /// Mutably borrow the `next` element in the list.
-    ///
-    /// # Returns
-    /// - `Some(&mut T)` if there is a next element in the list.
-    /// -  or `None` if this is the last.
-    #[inline]
-    fn next_mut(&mut self) -> Option<&mut T> {
-        self.next.as_mut()
-    }
-
-    /// Returns true if this set of links is a member of a list.
-    #[inline]
-    fn is_linked(&self) -> bool {
-        self.next.is_some()
-    }
-}
-
-impl<T> Clone for Links<T> {
-    #[inline]
-    fn clone(&self) -> Self {
-        Links::new()
     }
 }
