@@ -127,7 +127,7 @@ where
     Ref: DerefMut,
 {
     /// Push a node to the head of the list.
-    pub fn push_front_node(&mut self, mut node: Ref) -> &mut Self {
+    pub fn push(&mut self, mut node: Ref) -> &mut Self {
         unsafe {
             *node.next_mut() = self.head;
             let node = Link::from_owning_ref(node);
@@ -144,7 +144,7 @@ where
     Ref: OwningRef<Node>,
 {
     /// Pop a node from the front of the list.
-    pub fn pop_front_node(&mut self) -> Option<Ref> {
+    pub fn pop(&mut self) -> Option<Ref> {
         unsafe {
             self.head.as_ptr().map(|node| {
                 self.head = (*node).take_next();
@@ -202,8 +202,8 @@ where
 {
     /// Push an item to the front of the list.
     #[inline]
-    pub fn push_front(&mut self, item: T) -> &mut Self {
-        self.push_front_node(Box::new(Node::from(item)))
+    pub fn push_item(&mut self, item: T) -> &mut Self {
+        self.push(Box::new(Node::from(item)))
     }
 }
 
@@ -215,7 +215,7 @@ where
 {
     /// Pop an item from the front of the list.
     #[inline]
-    pub fn pop_front(&mut self) -> Option<T> {
-        self.pop_front_node().map(|b| (*b).into())
+    pub fn pop_item(&mut self) -> Option<T> {
+        self.pop().map(|b| (*b).into())
     }
 }

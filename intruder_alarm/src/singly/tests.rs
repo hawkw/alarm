@@ -84,7 +84,7 @@ mod boxed {
             assert!(list.is_empty());
             assert_eq!(list.len(), 0);
 
-            list.push_front_node(Box::new(NumberedNode::new(1)));
+            list.push(Box::new(NumberedNode::new(1)));
 
             assert_eq!(list.is_empty(), false);
             assert_eq!(list.len(), 1);
@@ -95,7 +95,7 @@ mod boxed {
             let mut list = NumberedList::new();
             assert_eq!(list.head(), None);
 
-            list.push_front_node(Box::new(NumberedNode::new(555)));
+            list.push(Box::new(NumberedNode::new(555)));
 
             assert_eq!(list.head().unwrap().number, 555);
         }
@@ -104,10 +104,10 @@ mod boxed {
     quickcheck! {
         fn push_front_node_order(x: usize, xs: Vec<usize>) -> TestResult {
             let mut list = NumberedList::new();
-            list.push_front_node(Box::new(NumberedNode::new(x)));
+            list.push(Box::new(NumberedNode::new(x)));
             let mut result = TestResult::passed();
             for x_2 in xs {
-                list.push_front_node(Box::new(NumberedNode::new(x_2)));
+                list.push(Box::new(NumberedNode::new(x_2)));
                 result = TestResult::from_bool(
                     //list.tail().unwrap().number == x &&
                     list.head().unwrap().number == x_2
@@ -124,7 +124,7 @@ mod boxed {
             assert!(list.is_empty());
             assert_eq!(list.len(), 0);
 
-            list.push_front(n);
+            list.push_item(n);
 
             !list.is_empty() && list.len() == 1
         }
@@ -132,7 +132,7 @@ mod boxed {
         fn contents_after_first_push(n: usize) -> bool {
             let mut list = NumberedList::new();
             assert_eq!(list.head(), None);
-            list.push_front(n);
+            list.push_item(n);
             list.head().unwrap().number == n
         }
     }
@@ -141,15 +141,15 @@ mod boxed {
     fn contents_after_push_nodes() {
         let mut list = NumberedList::new();
 
-        list.push_front_node(Box::new(NumberedNode::new(0)));
-        list.push_front_node(Box::new(NumberedNode::new(1)));
+        list.push(Box::new(NumberedNode::new(0)));
+        list.push(Box::new(NumberedNode::new(1)));
 
         assert_eq!(list.head().unwrap().number, 1);
 
-        list.push_front_node(Box::new(NumberedNode::new(2)));
+        list.push(Box::new(NumberedNode::new(2)));
         assert_eq!(list.head().unwrap().number, 2);
 
-        list.push_front_node(Box::new(NumberedNode::new(3)));
+        list.push(Box::new(NumberedNode::new(3)));
         assert_eq!(list.head().unwrap().number, 3);
 
         assert!(!list.is_empty());
@@ -162,29 +162,29 @@ mod boxed {
         assert_eq!(list.head(), None);
         assert!(list.is_empty());
 
-        list.push_front_node(Box::new(NumberedNode::new(2)));
+        list.push(Box::new(NumberedNode::new(2)));
 
         assert!(!list.is_empty());
 
-        list.push_front_node(Box::new(NumberedNode::new(1)));
-        list.push_front_node(Box::new(NumberedNode::new(0)));
+        list.push(Box::new(NumberedNode::new(1)));
+        list.push(Box::new(NumberedNode::new(0)));
 
         assert_eq!(list.head().unwrap().number, 0);
 
-        list.push_front_node(Box::new(NumberedNode::new(3)));
+        list.push(Box::new(NumberedNode::new(3)));
 
-        list.push_front_node(Box::new(NumberedNode::new(4)));
+        list.push(Box::new(NumberedNode::new(4)));
 
         assert!(!list.is_empty());
 
-        assert_eq!(list.pop_front_node().unwrap().number, 4);
-        assert_eq!(list.pop_front_node().unwrap().number, 3);
-        assert_eq!(list.pop_front_node().unwrap().number, 0);
-        assert_eq!(list.pop_front_node().unwrap().number, 1);
-        assert_eq!(list.pop_front_node().unwrap().number, 2);
+        assert_eq!(list.pop().unwrap().number, 4);
+        assert_eq!(list.pop().unwrap().number, 3);
+        assert_eq!(list.pop().unwrap().number, 0);
+        assert_eq!(list.pop().unwrap().number, 1);
+        assert_eq!(list.pop().unwrap().number, 2);
 
         assert!(list.is_empty());
-        assert_eq!(list.pop_front_node(), None);
+        assert_eq!(list.pop(), None);
     }
 
     #[test]
@@ -194,28 +194,28 @@ mod boxed {
         assert_eq!(list.head(), None);
         assert!(list.is_empty());
 
-        list.push_front_node(Box::new(NumberedNode::new(2)));
+        list.push(Box::new(NumberedNode::new(2)));
 
         assert!(!list.is_empty());
 
-        list.push_front_node(Box::new(NumberedNode::new(1)));
-        list.push_front_node(Box::new(NumberedNode::new(0)));
+        list.push(Box::new(NumberedNode::new(1)));
+        list.push(Box::new(NumberedNode::new(0)));
 
         assert_eq!(list.head().unwrap().number, 0);
 
-        list.push_front_node(Box::new(NumberedNode::new(3)));
+        list.push(Box::new(NumberedNode::new(3)));
 
-        list.push_front_node(Box::new(NumberedNode::new(4)));
+        list.push(Box::new(NumberedNode::new(4)));
 
         assert!(!list.is_empty());
 
-        assert_eq!(list.pop_front().unwrap(), 4);
-        assert_eq!(list.pop_front().unwrap(), 3);
-        assert_eq!(list.pop_front().unwrap(), 0);
-        assert_eq!(list.pop_front().unwrap(), 1);
-        assert_eq!(list.pop_front().unwrap(), 2);
+        assert_eq!(list.pop_item().unwrap(), 4);
+        assert_eq!(list.pop_item().unwrap(), 3);
+        assert_eq!(list.pop_item().unwrap(), 0);
+        assert_eq!(list.pop_item().unwrap(), 1);
+        assert_eq!(list.pop_item().unwrap(), 2);
 
         assert!(list.is_empty());
-        assert_eq!(list.pop_front(), None);
+        assert_eq!(list.pop_item(), None);
     }
 }
