@@ -109,7 +109,6 @@ mod boxed {
             for x_2 in xs {
                 list.push(Box::new(NumberedNode::new(x_2)));
                 result = TestResult::from_bool(
-                    //list.tail().unwrap().number == x &&
                     list.head().unwrap().number == x_2
                 );
             }
