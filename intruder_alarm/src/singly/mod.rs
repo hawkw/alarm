@@ -49,8 +49,7 @@ pub struct List<T, N, R> {
 //  Linked
 /// Trait that must be implemented in order to be a member of an intrusive
 /// singly linked list.
-pub trait Linked: Sized // + Drop
-{
+pub trait Linked: Sized {
     /// Borrow this element's next [`Link`].
     ///
     /// [`Links`]: struct.Link.html
