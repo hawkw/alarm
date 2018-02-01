@@ -21,7 +21,7 @@ mod tests;
 /// An intrusive singly-linked list.
 ///
 /// This type is a wrapper around a series of [`Node`]s. It stores [`Link`]s
-/// to the head and tail [`Node`]s and the length of the list.
+/// to the head [`Node`]s and the length of the list.
 ///
 /// # Type parameters
 /// - `T`: the type of the items stored by each `N`
@@ -104,7 +104,7 @@ impl<T, Node, R> List<T, Node, R> {
     ///   - `Some(&N)` if the list has elements
     ///   - `None` if the list is empty.
     #[inline]
-    pub fn head(&self) -> Option<&Node> {
+    pub fn peek(&self) -> Option<&Node> {
         self.head.as_ref()
     }
 
@@ -114,7 +114,7 @@ impl<T, Node, R> List<T, Node, R> {
     ///   - `Some(&mut Node)` if the list has elements
     ///   - `None` if the list is empty.
     #[inline]
-    pub fn head_mut(&mut self) -> Option<&mut Node> {
+    pub fn peek_mut(&mut self) -> Option<&mut Node> {
         self.head.as_mut()
     }
 }
@@ -126,7 +126,7 @@ where
     Ref: DerefMut,
 {
     /// Push a node to the list.
-    pub fn push(&mut self, mut node: Ref) -> &mut Self {
+    pub fn push_node(&mut self, mut node: Ref) -> &mut Self {
         unsafe {
             *node.next_mut() = self.head;
             let node = Link::from_owning_ref(node);
@@ -143,7 +143,7 @@ where
     Ref: OwningRef<Node>,
 {
     /// Pop a node from the list.
-    pub fn pop(&mut self) -> Option<Ref> {
+    pub fn pop_node(&mut self) -> Option<Ref> {
         unsafe {
             self.head.as_ptr().map(|node| {
                 self.head = (*node).take_next();
@@ -165,7 +165,7 @@ where
     ///   - `None` if the list is empty.
     #[inline]
     pub fn front(&self) -> Option<&T> {
-        self.head().map(Node::as_ref)
+        self.peek().map(Node::as_ref)
     }
 }
 
@@ -179,8 +179,8 @@ where
     ///   - `Some(&mut T)` if the list has elements
     ///   - `None` if the list is empty.
     #[inline]
-    pub fn front_mut(&mut self) -> Option<&mut T> {
-        self.head_mut().map(Node::as_mut)
+    pub fn head_mut(&mut self) -> Option<&mut T> {
+        self.peek_mut().map(Node::as_mut)
     }
 }
 
@@ -201,8 +201,8 @@ where
 {
     /// Push an item to the list.
     #[inline]
-    pub fn push_item(&mut self, item: T) -> &mut Self {
-        self.push(Box::new(Node::from(item)))
+    pub fn push(&mut self, item: T) -> &mut Self {
+        self.push_node(Box::new(Node::from(item)))
     }
 }
 
@@ -214,7 +214,7 @@ where
 {
     /// Pop an item from the list.
     #[inline]
-    pub fn pop_item(&mut self) -> Option<T> {
-        self.pop().map(|b| (*b).into())
+    pub fn pop(&mut self) -> Option<T> {
+        self.pop_node().map(|b| (*b).into())
     }
 }

@@ -80,11 +80,11 @@ mod boxed {
         fn not_empty_after_first_push() {
             let mut list = NumberedList::new();
 
-            assert_eq!(list.head(), None);
+            assert_eq!(list.peek(), None);
             assert!(list.is_empty());
             assert_eq!(list.len(), 0);
 
-            list.push(Box::new(NumberedNode::new(1)));
+            list.push_node(Box::new(NumberedNode::new(1)));
 
             assert_eq!(list.is_empty(), false);
             assert_eq!(list.len(), 1);
@@ -93,23 +93,23 @@ mod boxed {
         #[test]
         fn contents_after_first_push() {
             let mut list = NumberedList::new();
-            assert_eq!(list.head(), None);
+            assert_eq!(list.peek(), None);
 
-            list.push(Box::new(NumberedNode::new(555)));
+            list.push_node(Box::new(NumberedNode::new(555)));
 
-            assert_eq!(list.head().unwrap().number, 555);
+            assert_eq!(list.peek().unwrap().number, 555);
         }
     }
 
     quickcheck! {
         fn push_front_node_order(x: usize, xs: Vec<usize>) -> TestResult {
             let mut list = NumberedList::new();
-            list.push(Box::new(NumberedNode::new(x)));
+            list.push_node(Box::new(NumberedNode::new(x)));
             let mut result = TestResult::passed();
             for x_2 in xs {
-                list.push(Box::new(NumberedNode::new(x_2)));
+                list.push_node(Box::new(NumberedNode::new(x_2)));
                 result = TestResult::from_bool(
-                    list.head().unwrap().number == x_2
+                    list.peek().unwrap().number == x_2
                 );
             }
             result
@@ -118,21 +118,21 @@ mod boxed {
         fn not_empty_after_push(n: usize) -> bool {
             let mut list = NumberedList::new();
 
-            assert_eq!(list.head(), None);
+            assert_eq!(list.peek(), None);
 
             assert!(list.is_empty());
             assert_eq!(list.len(), 0);
 
-            list.push_item(n);
+            list.push(n);
 
             !list.is_empty() && list.len() == 1
         }
 
         fn contents_after_first_push(n: usize) -> bool {
             let mut list = NumberedList::new();
-            assert_eq!(list.head(), None);
-            list.push_item(n);
-            list.head().unwrap().number == n
+            assert_eq!(list.peek(), None);
+            list.push(n);
+            list.peek().unwrap().number == n
         }
     }
 
@@ -140,16 +140,16 @@ mod boxed {
     fn contents_after_push_nodes() {
         let mut list = NumberedList::new();
 
-        list.push(Box::new(NumberedNode::new(0)));
-        list.push(Box::new(NumberedNode::new(1)));
+        list.push_node(Box::new(NumberedNode::new(0)));
+        list.push_node(Box::new(NumberedNode::new(1)));
 
-        assert_eq!(list.head().unwrap().number, 1);
+        assert_eq!(list.peek().unwrap().number, 1);
 
-        list.push(Box::new(NumberedNode::new(2)));
-        assert_eq!(list.head().unwrap().number, 2);
+        list.push_node(Box::new(NumberedNode::new(2)));
+        assert_eq!(list.peek().unwrap().number, 2);
 
-        list.push(Box::new(NumberedNode::new(3)));
-        assert_eq!(list.head().unwrap().number, 3);
+        list.push_node(Box::new(NumberedNode::new(3)));
+        assert_eq!(list.peek().unwrap().number, 3);
 
         assert!(!list.is_empty());
     }
@@ -158,63 +158,63 @@ mod boxed {
     fn test_pop_front_node() {
         let mut list = NumberedList::new();
 
-        assert_eq!(list.head(), None);
+        assert_eq!(list.peek(), None);
         assert!(list.is_empty());
 
-        list.push(Box::new(NumberedNode::new(2)));
+        list.push_node(Box::new(NumberedNode::new(2)));
 
         assert!(!list.is_empty());
 
-        list.push(Box::new(NumberedNode::new(1)));
-        list.push(Box::new(NumberedNode::new(0)));
+        list.push_node(Box::new(NumberedNode::new(1)));
+        list.push_node(Box::new(NumberedNode::new(0)));
 
-        assert_eq!(list.head().unwrap().number, 0);
+        assert_eq!(list.peek().unwrap().number, 0);
 
-        list.push(Box::new(NumberedNode::new(3)));
+        list.push_node(Box::new(NumberedNode::new(3)));
 
-        list.push(Box::new(NumberedNode::new(4)));
+        list.push_node(Box::new(NumberedNode::new(4)));
 
         assert!(!list.is_empty());
 
-        assert_eq!(list.pop().unwrap().number, 4);
-        assert_eq!(list.pop().unwrap().number, 3);
-        assert_eq!(list.pop().unwrap().number, 0);
-        assert_eq!(list.pop().unwrap().number, 1);
-        assert_eq!(list.pop().unwrap().number, 2);
+        assert_eq!(list.pop_node().unwrap().number, 4);
+        assert_eq!(list.pop_node().unwrap().number, 3);
+        assert_eq!(list.pop_node().unwrap().number, 0);
+        assert_eq!(list.pop_node().unwrap().number, 1);
+        assert_eq!(list.pop_node().unwrap().number, 2);
 
         assert!(list.is_empty());
-        assert_eq!(list.pop(), None);
+        assert_eq!(list.pop_node(), None);
     }
 
     #[test]
     fn test_pop_front() {
         let mut list = NumberedList::new();
 
-        assert_eq!(list.head(), None);
+        assert_eq!(list.peek(), None);
         assert!(list.is_empty());
 
-        list.push(Box::new(NumberedNode::new(2)));
+        list.push_node(Box::new(NumberedNode::new(2)));
 
         assert!(!list.is_empty());
 
-        list.push(Box::new(NumberedNode::new(1)));
-        list.push(Box::new(NumberedNode::new(0)));
+        list.push_node(Box::new(NumberedNode::new(1)));
+        list.push_node(Box::new(NumberedNode::new(0)));
 
-        assert_eq!(list.head().unwrap().number, 0);
+        assert_eq!(list.peek().unwrap().number, 0);
 
-        list.push(Box::new(NumberedNode::new(3)));
+        list.push_node(Box::new(NumberedNode::new(3)));
 
-        list.push(Box::new(NumberedNode::new(4)));
+        list.push_node(Box::new(NumberedNode::new(4)));
 
         assert!(!list.is_empty());
 
-        assert_eq!(list.pop_item().unwrap(), 4);
-        assert_eq!(list.pop_item().unwrap(), 3);
-        assert_eq!(list.pop_item().unwrap(), 0);
-        assert_eq!(list.pop_item().unwrap(), 1);
-        assert_eq!(list.pop_item().unwrap(), 2);
+        assert_eq!(list.pop().unwrap(), 4);
+        assert_eq!(list.pop().unwrap(), 3);
+        assert_eq!(list.pop().unwrap(), 0);
+        assert_eq!(list.pop().unwrap(), 1);
+        assert_eq!(list.pop().unwrap(), 2);
 
         assert!(list.is_empty());
-        assert_eq!(list.pop_item(), None);
+        assert_eq!(list.pop(), None);
     }
 }
